@@ -61,6 +61,10 @@ Update `cdk.json` by adding a `plugin` array property, and a `crossAccountConfig
 }
 ```
 
+## Debugging
+
+`export DEBUG=cdk-cross-account-plugin` to activate internal logging of plugin activity to the command line.
+
 ## Roadmap
 
 * Will be looking into if AWS SSO can be supported
