@@ -5,6 +5,10 @@
   "main": "lib/index.js",
   "author": "Cloudmation LLC (@mrapczynski)",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudmation-llc/cdk-cross-account-plugin"
+  },
   "scripts": {
     "build": "tsc",
     "build-live": "tsc --watch"
