@@ -39,7 +39,7 @@ Assuming you have already installed the CDK, the plugin can be installed with `n
 
 Update `cdk.json` by adding a `plugin` array property, and a `crossAccountConfig` block. Example:
 
-```json
+```javascript
 {
   "app": "python3 app.py",
 
