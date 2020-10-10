@@ -1,0 +1,26 @@
+{
+  "name": "cdk-cross-account-plugin",
+  "version": "1.0.0",
+  "description": "An AWS CDK plugin which implements profiles, IAM roles, and MFA for complex multi-account projects",
+  "main": "lib/index.js",
+  "author": "Cloudmation LLC (@mrapczynski)",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "build-live": "tsc --watch"
+  },
+  "dependencies": {
+    "conf": "7.1.2",
+    "debug": "4.2.0",
+    "dot-prop": "6.0.0",
+    "inquirer": "7.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.11.6",
+    "eslint": "^7.10.0"
+  },
+  "optionalDependencies": {
+    "aws-cdk": "^1.67.0",
+    "aws-sdk": "^2.770.0"
+  }
+}

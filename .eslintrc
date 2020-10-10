@@ -1,0 +1,23 @@
+{
+	"parserOptions": {
+	  "ecmaVersion": 2021,
+	  "ecmaFeatures": {
+		"impliedStrict": true
+	  },
+	  "sourceType": "module"
+	},
+	"env": {
+	  "es6": true,
+	  "mocha": true,
+	  "node": true
+	},
+	"extends": ["eslint:recommended"],
+	"rules": {
+	  "no-alert": 0,
+	  "no-console": 0,
+	  "no-new-symbol": 0,
+	  "no-self-assign": 0,
+	  "no-unused-labels": 0,
+	  "semi": 2
+	}
+  }
