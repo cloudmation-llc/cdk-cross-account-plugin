@@ -1,8 +1,8 @@
 # Cross Account Plugin for AWS CDK
 
-The [AWS CDK](https://docs.aws.amazon.com/cdk/index.html) is great. However, some complicated authentication schemes are not supported natively, but can be implemented using [plugins](https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-cdk/plugin.html). For client work, I needed to be able to support multiple profiles, each with a different IAM role to assume, and MFA in one shot. 
+The [AWS CDK](https://docs.aws.amazon.com/cdk/index.html) is great. However, some complicated authentication schemes are not supported natively, but can be implemented using [plugins](https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-cdk/plugin.html). For client work, I needed to be able to support multiple profiles, each with a different IAM role to assume, and MFA in one shot. Also supported is AWS SSO.
 
-There other community projects with CDK authentication plugins. Inexplicably they did not work, and in the course of studying the code for debugging, I ended up creating my own plugin that worked the way I wanted.
+There are existing community projects for CDK authentication plugins. Inexplicably they did not work, and in the course of studying the code for debugging, I ended up creating my own plugin that worked the way I wanted.
 
 **Prior Art:** [CDK plugins on NPM](https://www.npmjs.com/search?q=cdk%20plugin)
 
@@ -23,9 +23,9 @@ env_production = core.Environment(
     region=context_group_prod.region)
 ```
 
-When using this cross account plugin, the CDK will evaluate which accounts are being accessed depending which stacks I am requesting to deploy, and according to the plugin configuration will try to obtain credentials for each account using a matching profile from `$HOME/.aws/config`. IAM role assumption and MFA are all supported. The instructions below will show how to associate an account ID with a profile name.
+When using this cross account plugin, the CDK will evaluate which account credentials are needed according to the stacks I am deploying. The instructions below will show how to provide plugin specific config to associate an account ID with a named profile.
 
-An added bonus is that this plugin _will locally cache the session token for 1 hour_ so that you do not need to repeatedly enter the MFA challenge token. Great for CDK debugging and iterating on stacks.
+An added bonus is that this plugin _will locally cache the temporary credentials_ so that you do not need to repeatedly enter the MFA challenge token. Great for CDK debugging and iterating on stacks.
 
 One caveat is to be aware of _cross-account_ _cross-stack_ references are not supported with CloudFormation. The temptation is real thinking you can get away with it, but CDK will sort it out and throw an error. So if you have a resource in one account that supports sharing across boundaries to another account, consider moving those outputs to context variables instead of relying on CDK output autowiring.
 
@@ -61,10 +61,32 @@ Update `cdk.json` by adding a `plugin` array property, and a `crossAccountConfig
 }
 ```
 
+## AWS SSO Support
+
+You can use AWS SSO for credentials and roles as long as you are using AWS CLI v2.
+
+First, follow the [instructions provided by AWS](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html) to setup profiles specifically for SSO. When the process is complete, you should be able to see those profiles in `$HOME/.aws/config`. You can specify those profiles in the `crossAccountConfig` block as explained in the previous section. The plugin will automatically detect if it is an SSO config, and apply a different behavior to assume the intended IAM role. Once credentials are obtained, local caching is used until they expire.
+
+**Example Profile:**
+
+```
+[profile sso-dev]
+sso_start_url = https://yourorg.awsapps.com/start
+sso_region = us-west-2
+sso_account_id = account-id-1
+sso_role_name = YourIAMRole
+region = us-west-2
+output = json
+```
+
+Once SSO is configured, before you start using the CDK, run `aws sso login --profile profile-name-here`, and complete the authentication process. Once successful, you can start using the CDK right away.
+
+If you are using SSO with multiple accounts and roles, it is expected that you will have a profile configured for each one.
+
 ## Debugging
 
 `export DEBUG=cdk-cross-account-plugin` to activate internal logging of plugin activity to the command line.
 
 ## Roadmap
 
-* Will be looking into if AWS SSO can be supported
+- [x] ~~Will be looking into if AWS SSO can be supported~~ **Delivered with version 2.0**

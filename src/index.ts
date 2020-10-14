@@ -1,8 +1,12 @@
 import { CredentialProviderSource, Mode, Plugin, PluginHost } from 'aws-cdk';
-import { Credentials, SharedIniFileCredentials } from 'aws-sdk';
+import { Credentials, IniLoader, SharedIniFileCredentials, SSO } from 'aws-sdk';
 import { existsSync, readFileSync } from 'fs';
+import { homedir } from 'os';
+import { resolve as resolvePath } from 'path';
 import { get, has } from 'dot-prop';
 import { prompt } from 'inquirer';
+import { find as findFiles, read as readFile } from 'fs-jetpack';
+import { formatDistance } from 'date-fns';
 import Conf from 'conf';
 import Debug from 'debug';
 
@@ -91,7 +95,9 @@ class CrossAccountCredentialProvider implements CredentialProviderSource {
             let now: number = new Date().getTime();
             let expires: number = new Date(<string>cachedCredentials.expireTime).getTime();
             if(now < expires) {
-                log(`Using existing valid cached credentials`);
+                let timeRemaining: string = formatDistance(now, expires);
+                log(`Using existing valid cached credentials (expires in ${timeRemaining})`);
+                
                 return Promise.resolve(new Credentials({
                     accessKeyId: cachedCredentials.accessKeyId,
                     secretAccessKey: cachedCredentials.secretAccessKey,
@@ -102,11 +108,80 @@ class CrossAccountCredentialProvider implements CredentialProviderSource {
             log(`Cached credentials have expired`);
         }
 
+        // Load locally defined AWS profiles
+        let profileLoader: IniLoader = new IniLoader();
+        let profiles = profileLoader.loadFrom({ isConfig: true });
+        let profile: Record<string, any> = profiles[profileName];
+
+        // Validate
+        if(profile === undefined) {
+            return Promise.reject(new Error(`Unable to find AWS named config profile ${profileName}`))
+        }
+
+        // Determine if SSO is used for authentication
+        if(profile.sso_start_url) {
+            // Resolve and validate SSO cache directory created by v2 CLI
+            let ssoCacheDirectory: string = resolvePath(homedir(), '.aws', 'sso', 'cache');
+            log(`Checking SSO cache directory ${ssoCacheDirectory}`);
+        
+            if(!(existsSync(ssoCacheDirectory))) {
+                return Promise.reject(new Error(`SSO cache directory not found - have you logged into AWS SSO first?`));
+            }
+            log(`SSO cache directory found (possibly logged in)`);
+
+            // Search .json files that contain cached tokens (ignoring botocore files)
+            let ssoToken: Record<string, any> = findFiles(ssoCacheDirectory, { matching: ['*.json', '!botocore*'], recursive: false })
+                .map(path => readFile(path, 'json'))
+                .find(cachedToken => {
+                    // Parse expiration date
+                    cachedToken.expiresAtNative = new Date(cachedToken.expiresAt.replace('UTC', '+00:00'));
+                    cachedToken.now = new Date();
+
+                    // Match for SSO start URL and token is not expired
+                    return cachedToken.startUrl === profile.sso_start_url
+                        && cachedToken.region === profile.sso_region
+                        && cachedToken.now < cachedToken.expiresAtNative;
+                });
+
+            // Validate
+            if(ssoToken === undefined) {
+                return Promise.reject(new Error(`SSO session for ${profile.sso_start_url} is expired - have you logged into AWS SSO first?`));     
+            }
+
+            // Create SSO client
+            let ssoClient: SSO = new SSO({
+                region: profile.sso_region
+            });
+
+            // Resolve STS credentials from SSO service
+            return ssoClient
+                .getRoleCredentials({
+                    roleName: profile.sso_role_name,
+                    accountId: profile.sso_account_id,
+                    accessToken: ssoToken.accessToken
+                })
+                .promise()
+                .then(response => {       
+                    // Cache in local config
+                    this.pluginConfig.set(`credentialCache.${profileName}.accessKeyId`, response.roleCredentials.accessKeyId);
+                    this.pluginConfig.set(`credentialCache.${profileName}.secretAccessKey`, response.roleCredentials.secretAccessKey);
+                    this.pluginConfig.set(`credentialCache.${profileName}.sessionToken`, response.roleCredentials.sessionToken);
+                    this.pluginConfig.set(`credentialCache.${profileName}.expireTime`, ssoToken.expiresAtNative.toISOString());
+                    log(`Saved new credentials to local plugin cache ${this.pluginConfig.path}`);
+
+                    return new Credentials({
+                        accessKeyId: response.roleCredentials.accessKeyId,
+                        secretAccessKey: response.roleCredentials.secretAccessKey,
+                        sessionToken: response.roleCredentials.sessionToken
+                    });
+                });
+        }
+
         // Create provider with defaults
         let provider: SharedIniFileCredentials = new SharedIniFileCredentials({
             profile: profileName,
             tokenCodeFn: getTokenCode.bind(null, profileName)
-        });
+        }); 
 
         // Resolve credentials
         return provider
