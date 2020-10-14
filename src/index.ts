@@ -43,6 +43,7 @@ class CrossAccountCredentialProvider implements CredentialProviderSource {
 
     constructor() {
         this.pluginConfig = new Conf();
+        log(`Using local plugin config storage at ${this.pluginConfig.path}`);
     }
 
     isAvailable(): Promise<boolean> {
@@ -162,13 +163,6 @@ class CrossAccountCredentialProvider implements CredentialProviderSource {
                 })
                 .promise()
                 .then(response => {       
-                    // Cache in local config
-                    this.pluginConfig.set(`credentialCache.${profileName}.accessKeyId`, response.roleCredentials.accessKeyId);
-                    this.pluginConfig.set(`credentialCache.${profileName}.secretAccessKey`, response.roleCredentials.secretAccessKey);
-                    this.pluginConfig.set(`credentialCache.${profileName}.sessionToken`, response.roleCredentials.sessionToken);
-                    this.pluginConfig.set(`credentialCache.${profileName}.expireTime`, ssoToken.expiresAtNative.toISOString());
-                    log(`Saved new credentials to local plugin cache ${this.pluginConfig.path}`);
-
                     return new Credentials({
                         accessKeyId: response.roleCredentials.accessKeyId,
                         secretAccessKey: response.roleCredentials.secretAccessKey,
