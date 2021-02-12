@@ -6,6 +6,11 @@ There are existing community projects for CDK authentication plugins. Inexplicab
 
 **Prior Art:** [CDK plugins on NPM](https://www.npmjs.com/search?q=cdk%20plugin)
 
+---
+**Update February 2021:** This plugin is currently maintained and in production use. Do not be alarmed by the lack of activity. As of right now, it has no known bugs and is working well with the most recent CDK releases such as 1.88.0
+
+---
+
 ## Background
 
 So what does this do? I have my `$HOME/.aws/config` set up with profiles for client environments. Those profiles include assuming an IAM role in a given account, and an associated MFA challenge. At a basic level, using the AWS_PROFILE=**** environment variable for command line work in connection with the CLI works fine for simple tasks. For complex multi-account projects using the CDK, the AWS_PROFILE variable falls short.
