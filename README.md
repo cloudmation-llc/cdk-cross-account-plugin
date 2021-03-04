@@ -86,7 +86,7 @@ output = json
 
 Once SSO is configured, before you start using the CDK, run `aws sso login --profile profile-name-here`, and complete the authentication process. Once successful, you can start using the CDK right away.
 
-If you are using SSO with multiple accounts and roles, it is expected that you will have a profile configured for each one.
+If you are using SSO with multiple accounts and roles, you can define a profile configuration for each account and role combination. If you are able to assume the same role/SSO permission set across multiple accounts, then one profile configuration may suffice.
 
 ## Debugging
 
