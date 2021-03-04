@@ -82,11 +82,11 @@ class CrossAccountCredentialProvider implements CredentialProviderSource {
         // Determine the method to use for resolving credentials
         if(config.profile) {
             // Use a named profile
-            return this.resolveWithProfile(config.profile);
+            return this.resolveWithProfile(config.profile, accountId);
         }    
     }
 
-    resolveWithProfile(profileName: string): Promise<Credentials> {
+    resolveWithProfile(profileName: string, targetAccount: string): Promise<Credentials> {
         log(`Resolving credentials with named profile ${profileName}`);
 
         // Check for cached credentials
@@ -155,10 +155,11 @@ class CrossAccountCredentialProvider implements CredentialProviderSource {
             });
 
             // Resolve STS credentials from SSO service
+            log(`Getting credentials from STS with SSO session role=${profile.sso_role_name} account=${targetAccount}`)
             return ssoClient
                 .getRoleCredentials({
                     roleName: profile.sso_role_name,
-                    accountId: profile.sso_account_id,
+                    accountId: targetAccount,
                     accessToken: ssoToken.accessToken
                 })
                 .promise()
