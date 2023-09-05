@@ -22,12 +22,19 @@
     "inquirer": "7.3.3"
   },
   "devDependencies": {
-    "@types/node": "^14.11.6",
-    "eslint": "^7.10.0"
+    "@types/node": "^18.17.1",
+    "eslint": "^8.48.0"
   },
   "optionalDependencies": {
     "c9": "^3.1.3534",
-    "aws-cdk": "^1.67.0",
-    "aws-sdk": "^2.770.0"
+    "aws-cdk": "^2.94.0",
+    "aws-sdk": "^2.1451.0"
+  },
+  "bugs": {
+    "url": "https://github.com/cloudmation-llc/cdk-cross-account-plugin/issues"
+  },
+  "homepage": "https://github.com/cloudmation-llc/cdk-cross-account-plugin#readme",
+  "directories": {
+    "lib": "lib"
   }
 }
