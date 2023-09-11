@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cloudmation-llc/cdk-cross-account-plugin"
+    "url": "https://github.com/AhsenBaig-forks/cdk-cross-account-plugin"
   },
   "scripts": {
     "build": "tsc",
@@ -29,11 +29,12 @@
     "c9": "^3.1.3534",
     "aws-cdk": "^2.95.1",
     "aws-sdk": "^2.1455.0"
-  },
+  }
+  ,
   "bugs": {
-    "url": "https://github.com/cloudmation-llc/cdk-cross-account-plugin/issues"
+    "url": "https://github.com/AhsenBaig-forks/cdk-cross-account-plugin/issues"
   },
-  "homepage": "https://github.com/cloudmation-llc/cdk-cross-account-plugin#readme",
+  "homepage": "https://github.com/AhsenBaig-forks/cdk-cross-account-plugin#readme",
   "directories": {
     "lib": "lib"
   }
