@@ -1,5 +1,5 @@
 {
-  "name": "cdk-cross-account-plugin",
+  "name": "@AhsenBaig-forks/cdk-cross-account-plugin",
   "version": "3.0.0",
   "description": "An AWS CDK plugin which implements profiles, IAM roles, MFA, and AWS SSO for complex multi-account projects",
   "main": "lib/index.js",
