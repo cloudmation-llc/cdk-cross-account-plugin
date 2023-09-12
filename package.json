@@ -9,6 +9,9 @@
     "type": "git",
     "url": "https://github.com/AhsenBaig-forks/cdk-cross-account-plugin"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/AhsenBaig-forks"
+  },
   "scripts": {
     "build": "tsc",
     "build-live": "tsc --watch"
@@ -29,8 +32,7 @@
     "c9": "^3.1.3534",
     "aws-cdk": "^2.95.1",
     "aws-sdk": "^2.1455.0"
-  }
-  ,
+  },
   "bugs": {
     "url": "https://github.com/AhsenBaig-forks/cdk-cross-account-plugin/issues"
   },
